@@ -760,8 +760,28 @@ func employe(writer http.ResponseWriter, request *http.Request)  {
 const BaseUrl  = "http://localhost:8080"
 
 func httpLearning()  {
-	var result,err = fetchEmployee()
+	fmt.Println("start web server on port 8080")
+	http.HandleFunc("/employe",employe)
+	http.HandleFunc("/employes",employes)
+	http.HandleFunc("/fetch",fetchData)
+	http.ListenAndServe(":8080",nil)
+}
 
+func fetchData(writer http.ResponseWriter, r *http.Request)  {
+	var result,err = fetchEmployee()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	writer.Header().Set("Content-Type","application/json")
+	data,err := json.Marshal(result)
+	if err != nil {
+		http.Error(writer,err.Error(),http.StatusInternalServerError)
+	}
+	writer.Write(data)
+
+	for _,each := range result  {
+		fmt.Println(each.Id)
+	}
 }
 
 func fetchEmployee()([]employee, error)  {
