@@ -18,6 +18,8 @@ import (
 	"net/http"
 	"encoding/json"
 	"strconv"
+	"net/url"
+	"bytes"
 )
 
 func handleRequests()  {
@@ -28,6 +30,12 @@ func handleRequests()  {
 func init()  {
 	fmt.Println("process started")
 	runtime.GOMAXPROCS(2)
+	fmt.Println("start web server on port 8080")
+	http.HandleFunc("/employe",employe)
+	http.HandleFunc("/employes",employes)
+	http.HandleFunc("/fetch",fetchData)
+	http.HandleFunc("/post",httpFormLearning)
+	http.ListenAndServe(":8080",nil)
 }
 func main()  {
 	//fmt.Println("go run in port 8081")
@@ -57,7 +65,7 @@ func main()  {
 	//httpListenerLearning()
 	//jsonLearning()
 	//jsonAPILearning()
-	httpLearning()
+	//httpLearning()
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request)  {
@@ -805,4 +813,43 @@ func fetchEmployee()([]employee, error)  {
 		return nil,err
 	}
 	return data,nil
+}
+
+func httpFormLearning(w http.ResponseWriter,r *http.Request)  {
+	var err error
+	var client = &http.Client{}
+	var data employee
+
+	var params = url.Values{}
+
+	params.Set("id","2")
+	fmt.Println(params)
+	var payload = bytes.NewBufferString(params.Encode())
+	fmt.Println(payload)
+
+	req,err := http.NewRequest("POST",BaseUrl+"/employe",payload)
+
+	if err != nil {
+		http.Error(w,err.Error(),http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	response,err := client.Do(req)
+
+	if err != nil {
+		http.Error(w,err.Error(),http.StatusInternalServerError)
+		return
+	}
+	defer response.Body.Close()
+
+	err = json.NewDecoder(response.Body).Decode(&data)
+	if err != nil {
+		http.Error(w,err.Error(),http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println(data)
+	return
+
 }
