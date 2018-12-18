@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"reflect"
-	"runtime"
 	"math/rand"
 	"os"
 	"strings"
@@ -14,12 +13,14 @@ import (
 	"encoding/base64"
 	"crypto/sha1"
 	"flag"
-	"os/exec"
 	"net/http"
 	"encoding/json"
 	"strconv"
 	"net/url"
 	"bytes"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+	"os/exec"
 )
 
 func handleRequests()  {
@@ -28,14 +29,14 @@ func handleRequests()  {
 	log.Fatal(http.ListenAndServe(":8081",router))
 }
 func init()  {
-	fmt.Println("process started")
-	runtime.GOMAXPROCS(2)
-	fmt.Println("start web server on port 8080")
-	http.HandleFunc("/employe",employe)
-	http.HandleFunc("/employes",employes)
-	http.HandleFunc("/fetch",fetchData)
-	http.HandleFunc("/post",httpFormLearning)
-	http.ListenAndServe(":8080",nil)
+	//fmt.Println("process started")
+	//runtime.GOMAXPROCS(2)
+	//fmt.Println("start web server on port 8080")
+	//http.HandleFunc("/employe",employe)
+	//http.HandleFunc("/employes",employes)
+	//http.HandleFunc("/fetch",fetchData)
+	//http.HandleFunc("/post",httpFormLearning)
+	//http.ListenAndServe(":8080",nil)
 }
 func main()  {
 	//fmt.Println("go run in port 8081")
@@ -66,6 +67,9 @@ func main()  {
 	//jsonLearning()
 	//jsonAPILearning()
 	//httpLearning()
+	//sqlLearning()
+	//prepareSqlLerning()
+	dbexecLearning()
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request)  {
@@ -852,4 +856,140 @@ func httpFormLearning(w http.ResponseWriter,r *http.Request)  {
 	fmt.Println(data)
 	return
 
+}
+
+func sqlLearning()  {
+	db, err := connectSql()
+	if err != nil{
+		fmt.Println(err.Error())
+		return
+	}
+	defer db.Close()
+
+	var query = "SELECT * FROM employee where id = ? OR name like ?"
+	rows ,err := db.Query(query,3,"%J%")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	defer rows.Close()
+
+	var result []employee
+
+	for rows.Next()  {
+		var each = employee{}
+		var err = rows.Scan(&each.Id,&each.Name,&each.Roles)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		result = append(result,each)
+	}
+
+	if err = rows.Err(); err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	fmt.Println(result)
+
+	//single query
+	var single = "SELECT id, name, roles FROM employee where id = ?"
+	var res  = employee{}
+	err = db.QueryRow(single,1).
+		Scan(&res.Id,&res.Name,&res.Roles)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	fmt.Println(res)
+
+}
+
+func connectSql()(*sql.DB,error)  {
+	db, err := sql.Open("mysql","root:@tcp(127.0.0.1:3306)/golang")
+	if err != nil{
+		return nil,err
+	}
+
+	return db,nil
+}
+
+func prepareSqlLerning()  {
+	db, err := connectSql()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("SELECT id,name,roles FROM employee where id = ?")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer stmt.Close() // *stmt ini harus di close juga
+
+	var res1 = employee{}
+	stmt.QueryRow(1).Scan(&res1.Id,&res1.Name,&res1.Roles)
+	fmt.Println(res1)
+	var res2 = employee{}
+	stmt.QueryRow(2).Scan(&res2.Id,&res2.Name,&res2.Roles)
+	fmt.Println(res2)
+	var res3 = employee{}
+	stmt.QueryRow(3).Scan(&res3.Id,&res3.Name,&res3.Roles)
+	fmt.Println(res3)
+}
+
+func dbexecLearning()  {
+	db,err := connectSql()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer db.Close()
+	insertStmt ,err := db.Prepare("INSERT INTO employee (name,roles) values (?,?)")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer insertStmt.Close()
+	data,_ := insertStmt.Exec("neticx","dev")
+	lookData(db)
+	id,_ := data.LastInsertId()
+	fmt.Println(id)
+
+	updateStmt,err := db.Prepare("update employee set name = ?, roles = ? where id=?")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer updateStmt.Close()
+
+	updateStmt.Exec("neticxploit","developer",id)
+	lookData(db)
+
+}
+
+func lookData(db *sql.DB){
+	rows , err := db.Query("select * from employee")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer rows.Close()
+	var final []employee
+	for rows.Next()  {
+		var result = employee{}
+
+		rows.Scan(&result.Id,&result.Name,&result.Roles)
+
+		final = append(final,result)
+	}
+	fmt.Println(final)
 }
