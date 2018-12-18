@@ -959,7 +959,7 @@ func dbexecLearning()  {
 		return
 	}
 	defer insertStmt.Close()
-	data,_ := insertStmt.Exec("neticx","dev")
+	data,_ := insertStmt.Exec("last","tes")
 	lookData(db)
 	id,_ := data.LastInsertId()
 	fmt.Println(id)
@@ -971,7 +971,17 @@ func dbexecLearning()  {
 	}
 	defer updateStmt.Close()
 
-	updateStmt.Exec("neticxploit","developer",id)
+	updateStmt.Exec("final","developer test",id)
+	lookData(db)
+
+	deleteStmt, err := db.Prepare("delete from employee where id = ?")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer deleteStmt.Close()
+
+	deleteStmt.Exec(id)
 	lookData(db)
 
 }
