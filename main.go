@@ -21,6 +21,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"os/exec"
+	"gopkg.in/mgo.v2"
 )
 
 func handleRequests()  {
@@ -69,7 +70,8 @@ func main()  {
 	//httpLearning()
 	//sqlLearning()
 	//prepareSqlLerning()
-	dbexecLearning()
+	//dbexecLearning()
+	nosqlLearning()
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request)  {
@@ -979,7 +981,7 @@ func dbexecLearning()  {
 		fmt.Println(err.Error())
 		return
 	}
-	defer deleteStmt.Close()
+	defer deleteStmt.Close() //dont forget to close it
 
 	deleteStmt.Exec(id)
 	lookData(db)
@@ -1002,4 +1004,45 @@ func lookData(db *sql.DB){
 		final = append(final,result)
 	}
 	fmt.Println(final)
+}
+
+type student struct {
+	Id int `bson:"id"`
+	Name string `bson:"name"`
+	Class string `bson:"class"`
+}
+func connectNoSql()(*mgo.Session, error)  {
+	var session, err = mgo.Dial("localhost")
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil,err
+	}
+
+	return session,nil
+}
+
+func nosqlLearning()  {
+	defer catch()
+	var db, err = connectNoSql()
+	if err != nil {
+		panic(err.Error())
+		fmt.Println(err.Error())
+		return
+	}
+	defer db.Close()
+
+	//view data
+	var collection = db.DB("golang").C("student")
+	lookMongo(collection)
+}
+
+func lookMongo(collection *mgo.Collection)  {
+	var res []student
+	err := collection.Find(nil).All(&res)
+	if err != nil {
+		panic(err.Error())
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println(res)
 }
