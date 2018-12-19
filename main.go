@@ -566,7 +566,7 @@ func panicLearning()  {
 
 func catch()  {
 	if r := recover(); r != nil {
-		fmt.Println("error occured",r)
+		fmt.Println("error occured : ",r)
 	}else {
 		fmt.Println("works as well")
 	}
@@ -1007,7 +1007,6 @@ func lookData(db *sql.DB){
 }
 
 type student struct {
-	Id int `bson:"id"`
 	Name string `bson:"name"`
 	Class string `bson:"class"`
 }
@@ -1034,6 +1033,17 @@ func nosqlLearning()  {
 	//view data
 	var collection = db.DB("golang").C("student")
 	lookMongo(collection)
+
+	//insert data
+	err = collection.Insert(&student{"muhammad","12"},&student{"fahmi","2"})
+	if err != nil{
+		panic(err.Error())
+		fmt.Println(err.Error())
+		return
+	}
+	lookMongo(collection)
+
+
 }
 
 func lookMongo(collection *mgo.Collection)  {
