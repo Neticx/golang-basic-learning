@@ -22,6 +22,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"os/exec"
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func handleRequests()  {
@@ -1035,7 +1036,7 @@ func nosqlLearning()  {
 	lookMongo(collection)
 
 	//insert data
-	err = collection.Insert(&student{"muhammad","12"},&student{"fahmi","2"})
+	err = collection.Insert(&student{"this","dua"})
 	if err != nil{
 		panic(err.Error())
 		fmt.Println(err.Error())
@@ -1043,6 +1044,21 @@ func nosqlLearning()  {
 	}
 	lookMongo(collection)
 
+	var updated = make(chan bool)
+
+	//update data
+	var selector = bson.M{"name":"this"}
+	go updateData(collection,selector,bson.M{"$set": bson.M{"name": "that"}},updated)
+
+	lookMongo(collection)
+	//delete data
+	<-updated
+	err = collection.Remove(bson.M{"name":"that"})
+	if err != nil {
+		panic(err.Error())
+		return
+	}
+	lookMongo(collection)
 
 }
 
@@ -1055,4 +1071,14 @@ func lookMongo(collection *mgo.Collection)  {
 		return
 	}
 	fmt.Println(res)
+}
+
+func updateData(collection *mgo.Collection,selector interface{},changes interface{},updated chan <- bool )(error)  {
+	err := collection.Update(selector,changes)
+	if err != nil {
+		panic(err.Error())
+		return err
+	}
+	updated <- true
+	return nil
 }
