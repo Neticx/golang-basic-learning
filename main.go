@@ -72,7 +72,8 @@ func main()  {
 	//sqlLearning()
 	//prepareSqlLerning()
 	//dbexecLearning()
-	nosqlLearning()
+	//nosqlLearning()
+	insertData()
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request)  {
@@ -1081,4 +1082,37 @@ func updateData(collection *mgo.Collection,selector interface{},changes interfac
 	}
 	updated <- true
 	return nil
+}
+
+type User struct {
+	Username string `bson:"username"`
+	Email string `bson:"email"`
+}
+
+type Method interface {
+	insert()
+}
+
+func (user *User) insert() {
+	db,err := connectNoSql()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer db.Close()
+
+	collection := db.DB("golang").C("users")
+
+	err = collection.Insert(user)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	return
+}
+
+func insertData()  {
+	var user Method = &User{"fahmi","neticxploit@gmail.com"}
+	user.insert()
 }
