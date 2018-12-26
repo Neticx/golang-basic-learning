@@ -8,6 +8,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"runtime"
+	"sync"
 )
 
 func handleRequests()  {
@@ -17,7 +19,7 @@ func handleRequests()  {
 }
 func init()  {
 	//fmt.Println("process started")
-	//runtime.GOMAXPROCS(2)
+	runtime.GOMAXPROCS(2)
 	//fmt.Println("start web server on port 8080")
 	//http.HandleFunc("/employe",employe)
 	//http.HandleFunc("/employes",employes)
@@ -58,7 +60,8 @@ func main()  {
 	//prepareSqlLerning()
 	//dbexecLearning()
 	//nosqlLearning()
-	insertData()
+	//insertData()
+	waitGroupLearning()
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request)  {
@@ -1136,4 +1139,22 @@ func insertData()  {
 	}
 	fmt.Println(data)
 
+}
+
+func doCountAndPrint(wg *sync.WaitGroup, x int, y int)  {
+	var result = x+y
+	wg.Done()
+	fmt.Println(result)
+}
+
+func waitGroupLearning()  {
+	var wg sync.WaitGroup
+
+	for i := 0; i < 10 ;i++  {
+		wg.Add(1)
+		go doCountAndPrint(&wg,1,i)
+	}
+	wg.Wait()
+
+	fmt.Println("done")
 }
