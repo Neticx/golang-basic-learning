@@ -49,3 +49,9 @@ func TestDataEmail(t *testing.T)  {
 			t.Errorf("salah, data tidak match! antara %s dan %s ", user_data.Email, lookup.Email)
 		}
 }
+
+func BenchmarkLooping(b *testing.B) {
+	for i := 0; i < b.N ; i++  {
+		user_data.getData()
+	}
+}
