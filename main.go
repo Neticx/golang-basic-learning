@@ -19,7 +19,7 @@ func handleRequests()  {
 }
 func init()  {
 	//fmt.Println("process started")
-	runtime.GOMAXPROCS(2)
+	runtime.GOMAXPROCS(5)
 	//fmt.Println("start web server on port 8080")
 	//http.HandleFunc("/employe",employe)
 	//http.HandleFunc("/employes",employes)
@@ -61,7 +61,8 @@ func main()  {
 	//dbexecLearning()
 	//nosqlLearning()
 	//insertData()
-	waitGroupLearning()
+	//waitGroupLearning()
+	mutexLearning()
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request)  {
@@ -1157,4 +1158,37 @@ func waitGroupLearning()  {
 	wg.Wait()
 
 	fmt.Println("done")
+}
+
+func mutexLearning()  {
+	var wg sync.WaitGroup
+	var meter counter
+
+	for i := 0; i < 1000 ; i++  {
+		wg.Add(1)
+		go func() {
+			for j := 0; j < 1000 ; j++  {
+				meter.add(1)
+			}
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
+	fmt.Println(meter.Value())
+}
+
+type counter struct {
+	sync.Mutex
+	val int
+}
+
+func (counter *counter) add( x int)  {
+	counter.Lock()
+	counter.val++
+	counter.Unlock()
+}
+
+func (counter *counter) Value() (x int) {
+	return counter.val
 }
