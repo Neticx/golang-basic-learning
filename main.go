@@ -4,23 +4,8 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
-	"reflect"
-	"math/rand"
-	"os"
-	"strings"
-	"errors"
-	"time"
-	"encoding/base64"
-	"crypto/sha1"
-	"flag"
 	"net/http"
-	"encoding/json"
-	"strconv"
-	"net/url"
-	"bytes"
-	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"os/exec"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -248,770 +233,770 @@ func HelloWorld(w http.ResponseWriter, r *http.Request)  {
 //	fmt.Println(length)
 //}
 //
-func pointerLearning()  {
-	var strings string = "tes"
-	var tes *string = &strings
-
-	fmt.Println(*tes)
-	*tes = "done"
-
-	fmt.Println(*tes)
-	fmt.Println(strings)
-
-}
-
-func structLearning()  {
-	var des = desa{}
-	des.Nama = "kampungku ini"
-	des.Kecamatan = "kresek"
-	fmt.Println(des.countLength())
-	des.changeDesa("mukidi")
-	fmt.Println(des.countLength())
-
-}
-
-type (
-	desa struct {
-		Nama string
-		Kecamatan string
-	}
-
-	kecamatan struct {
-		data int
-	}
-)
-//tipe data interface berarti bisa mengembalikan tipe data apapun.
-func (des desa) countLength() (interface{}) {
-	var length = len(des.Nama)
-	return length
-}
-
-func (des *desa) changeDesa(nama string)  {
-	des.Nama = nama
-}
-//public and private determine in character case, if starting with uppercase like Data, its public. if data, its private
-func accessLevelLearning()  {
-	var datas = Data{}
-	datas.name = "pilonopila"
-	fmt.Println(datas.CountDataLength())
-}
-
-func (bagi *kecamatan) pembagian() int {
-	bagi.data = bagi.data /2
-	return bagi.data
-	
-}
-
-
-func (bagi *kecamatan) pengurangan() int {
-	return  bagi.data - 2
-}
-
-type wilayah interface {
-	pembagian() int
-	pengurangan() int
-}
-
-func interfaceLearning()  {
-	var kec wilayah = &kecamatan{10}
-	fmt.Println(kec.pembagian())
-	fmt.Println(kec.pengurangan())
-}
-
-func emptyInterfaceLearning()  {
-	var inter interface{} = &kecamatan{2}
-	var secret = inter.(*kecamatan).data //casting to pointer, because default type of struct is string. so it should cast into each of type
-	var pon *int = &secret
-	fmt.Println(secret)
-	fmt.Println(*pon)
-}
-
-func reflectLearning()  {
-	var number int
-	number = 2
-
-	var name string
-	name = "fahmi"
-
-	var kec = kecamatan{2}
-	var point *int = &number
-
-	var reflectValue = reflect.ValueOf(point)
-
-	fmt.Println(reflect.ValueOf(number))
-	fmt.Println(reflect.ValueOf(name))
-	fmt.Println(reflect.ValueOf(kec))
-
-	fmt.Println(reflectValue.Kind())
-	fmt.Println(reflectValue.Type())
-	fmt.Println(reflectValue.Interface())
-	var tes = reflectValue.Elem() // Elem mengambil elemen asli jika tipe reflect nya adalah pointer
-	fmt.Println(tes.Kind()) // struct, pointer, int, string dll
-
-	var des = &desa{Nama: "pasir",Kecamatan:"kresek"}
-	des.getInfoProperty()
-}
-
-func (d *desa) getInfoProperty()  {
-	value := reflect.ValueOf(d)
-
-	if value.Kind() == reflect.Ptr {
-		value = value.Elem()
-	}
-	//fmt.Println(value)
-
-	var vtype = value.Type()
-	fmt.Println(value)
-	fmt.Println(value.NumField())
-	for i := 0; i < vtype.NumField() ; i++  {
-		fmt.Println("Name: ",vtype.Field(i).Name)
-		fmt.Println("Type: ",vtype.Field(i).Type)
-		fmt.Println("Value: ",value.Field(i).Interface()) // untuk mengakses interface, modifier atau field dari struct harus public
-	}
-}
-
-func goRoutineLearning()  {
-	go show("INI")
-	show("BUDI")
-	fmt.Scanln()
-}
-
-func show(message string)  {
-	for i := 0; i < 50; i++  {
-		fmt.Println((i + 1),message)
-	}
-}
-
-func channelLearning() {
-	var message= make(chan int, 2)
-	//var sayHello = func(who string) {
-	//	var result = fmt.Sprintf("hello %s", who)
-	//	message <- result
-	//}
-	//
-	//go sayHello("fahmi")
-	//go sayHello("ulul")
-	//go sayHello("azmi")
-	//
-	//var person1 = <-message
-	//fmt.Println(person1)
-	//
-	//var person2 = <-message
-	//fmt.Println(person2)
-	//
-	//var person3 = <-message
-	//fmt.Println(person3)
-
-	//channel as param
-	//var dummy = []string{"hello","world","hehe","this","is","sparta"}
-	//
-	//for _, data := range dummy {
-	//	go func(each string) {
-	//		message <- each
-	//	}(data)
-	//}
-	//
-	//for i := 0; i < len(dummy) ;i++  {
-	//	printChan(message)
-	//}
-	//buffered channel
-
-	go func() {
-		for {
-			i := <-message
-			fmt.Println("data received", i)
-		}
-	}()
-
-	for i := 0;i < 10 ;i++  {
-		fmt.Println("send data", i)
-		message <- i
-	}
-}
-
-func printChan(message chan string)  {
-	fmt.Println(<-message)
-}
-
-func loopChannelLearning()  {
-	var data = make(chan int)
-	go setData(data)
-	printData(data)
-}
-
-func setData(ch chan<- int)  {
-	for i := 0; i <= 100 ;i++  {
-		ch<- i
-	}
-	close(ch)
-}
-
-func printData(ch<- chan int)  {
-	for data := range ch {
-		fmt.Println(data)
-	}
-}
-
-//channel direction :
-// var chan<- = channel yang hanya bisa menerima data
-// var <-chan = channel yang hanya bisa mengirim data
-
-func channelTimeout()  {
-	rand.Seed(time.Now().Unix())
-	fmt.Println(time.Duration(rand.Int()%10+1))
-	var data = make(chan int)
-	go sendingData(data)
-	retrieveData(data)
-}
-
-func sendingData(ch chan<- int)  {
-	for i:= 0;true ;i++  {
-		ch<- i
-		time.Sleep(time.Duration(rand.Int()%10+1) * time.Second)
-	}
-}
-
-func retrieveData(ch <-chan int)  {
-// initialize loop label
-loop:
-	for {
-		select {
-			case data := <-ch:
-				fmt.Println("receive data:", data)
-			case <-time.After(time.Second * 5):
-				fmt.Println("timeout guys!!")
-				break loop
-		}
-	}
-
-}
-// defer berfungsi untuk meng-akhirkan eksekusi di paling akhir block code sekalipun setelah di return
-func deferLearning()  {
-	somedata := []string{"pizza","kebab","macaroni"}
-	for _,data := range somedata{
-		reasonChoise(data)
-	}
-}
-
-func reasonChoise(data string)  {
-	defer fmt.Println("<------------->")
-	defer fmt.Println("thank you!")
-
-	if data == "pizza" {
-		fmt.Println("great! you choose", data)
-		return
-	}else if data == "macaroni"{
-		fmt.Println("the",data,"is so nice!")
-		return
-	}
-
-	fmt.Println("you choose",data)
-}
-
-//exit statement will stop entire programs. either you was written defer statement, but it will not shown because exit will stop entire program and show exit status code
-func exitLearning()  {
-	var panic bool
-
-	panic = false
-	defer fmt.Println("sipp")
-
-	if panic {
-		os.Exit(1)
-	}else {
-		fmt.Println("works")
-	}
-}
-
-func errorLearning()  {
-	var input string
-
-	fmt.Scanln(&input)
-
-	//var result int
-	//var err error
-
-	//result, err = strconv.Atoi(input)
-	//
-	//if err != nil {
-	//	fmt.Println(err.Error())
-	//}else {
-	//	fmt.Println(result,"success")
-	//}
-
-	if valid, err := validate(input); valid {
-		fmt.Println("works", input)
-	}else {
-		fmt.Println(err.Error())
-	}
-
-}
-
-func validate(input string)(bool,error)  {
-	if strings.TrimSpace(input) == "" {
-		return false,errors.New("cannot accept empty input")
-	}
-	return true, nil
-}
-
-func panicLearning()  {
-	defer catch()
-	var input string
-	fmt.Scanln(&input)
-
-	if valid, err := validate(input); valid {
-		fmt.Println("works")
-	}else {
-		panic(err.Error())
-		fmt.Println("end")
-	}
-}
-
-func catch()  {
-	if r := recover(); r != nil {
-		fmt.Println("error occured : ",r)
-	}else {
-		fmt.Println("works as well")
-	}
-}
-
-func timeLearning()  {
-	var now = time.Now()
-	fmt.Println(now)
-	fmt.Println(now.Year())
-	var date,err = time.Parse("2006-01-02","2018-09-12");
-	fmt.Println(date)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-}
-
-func timeRoutineLearning()  {
-	var input int
-	var ch = make(chan bool)
-	var timeout int = 5
-	go timer(timeout,ch)
-	go watcher(timeout,ch)
-
-	fmt.Println("2x2 = ?")
-	fmt.Scanln(&input)
-
-	if input == 4 {
-		fmt.Println("benar")
-	}else {
-		fmt.Println("salah")
-	}
-
-}
-
-func timer(timeout int, ch chan <- bool)  {
-	time.AfterFunc(time.Duration(timeout)*time.Second, func() {
-		ch <- true
-	})
-}
-
-func watcher(timeout int, ch <- chan bool)  {
-	<-ch
-	fmt.Println("timeout!!!", timeout,"second")
-	os.Exit(0)
-}
-
-func encodeLearning()  {
-	var data = "hello world"
-	fmt.Println([]byte(data))
-	var encoded = base64.StdEncoding.EncodeToString([]byte(data))
-	fmt.Println(encoded)
-	var decoded,_ = base64.StdEncoding.DecodeString(encoded)
-	fmt.Println(string(decoded))
-}
-
-func hashLearning()  {
-	var data = "secret"
-	var sha = sha1.New()
-	sha.Write([]byte(data))
-	var hashed = fmt.Sprintf("%x",sha.Sum(nil))
-	fmt.Println(hashed)
-}
-
-func saltingHashLearning()  {
-	var data = "this is secret"
-	var salt =  fmt.Sprintf("%d",time.Now().UnixNano())
-	fmt.Println(reflect.ValueOf(salt).Kind())
-	var sha = sha1.New()
-	var salted = fmt.Sprintf("text: %s salt: %s",data,salt)
-	fmt.Println(salted)
-	sha.Write([]byte(salted))
-	var hashed = fmt.Sprintf("%x",sha.Sum(nil))
-	fmt.Println(hashed)
-
-}
-
-func flagArgLearning()  {
-	var data = os.Args
-	fmt.Printf("%#v \n", data)
-	var filter = data[1:]
-	fmt.Printf("%#v \n",filter)
-
-	var name = flag.String("name","Anonymous","user name")
-	var age = flag.Int64("age",18,"your age")
-	flag.Parse()
-
-	fmt.Printf("name: %s \n", *name)
-	fmt.Printf("age : %d \n", *age)
-
-}
-
-func execLearning(){
-	var outputs,_ = exec.Command("ls").Output()
-	fmt.Println(string(outputs))
-
-	var output2,_ = exec.Command("git","config","user.name").Output()
-	fmt.Println(string(output2))
-}
-
-func httpListenerLearning()  {
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Fprintln(writer, "hello world")
-	})
-
-	http.HandleFunc("/index",index)
-
-	fmt.Println("starting web on port 8080")
-	http.ListenAndServe(":8080",nil)
-
-}
-
-func index(writer http.ResponseWriter, request *http.Request)  {
-	fmt.Fprintln(writer, "index page")
-}
-
-type datajson struct {
-	FullName string `json:"Name"` //tag ini digunakan yang berarti "data json yang bernama Name itu masuk ke data struct FullName"
-	Roles string
-}
-
-
-func jsonLearning()  {
-	var data datajson
-
-	var jsonString = `{"Name": "Fahmi","Roles": "admin"}`
-	var jsonData = []byte(jsonString)
-
-	var err = json.Unmarshal(jsonData,&data)
-	if err != nil {
-		fmt.Println("error")
-		fmt.Println(err.Error())
-		return
-	}
-
-	fmt.Println(data.FullName)
-	fmt.Println(data.Roles)
-}
-
-type employee struct {
-	Id int
-	Name string
-	Roles string
-}
-var data = []employee{
-	employee{1,"Fahmi","admin"},
-	employee{2,"Ulul","user"},
-	employee{3,"Azmi","editor"},
-}
-
-func jsonAPILearning()  {
-
-	http.HandleFunc("/",index)
-	http.HandleFunc("/employes",employes )
-	http.HandleFunc("/employe",employe )
-	fmt.Println("starting go apps on port 8080")
-	http.ListenAndServe(":8080",nil)
-}
-
-func employes(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Content-Type","application/json")
-	if request.Method == "POST" {
-		var res,err = json.Marshal(data)
-		if err != nil {
-			http.Error(writer,err.Error(),http.StatusInternalServerError)
-		}
-
-		writer.Write(res)
-		return
-
-	}else if request.Method == "GET" {
-
-	}
-}
-
-func employe(writer http.ResponseWriter, request *http.Request)  {
-	writer.Header().Set("Content-Type","application/json")
-
-	if request.Method == "POST" {
-		var id,errors = strconv.Atoi( request.FormValue("id"))
-		if errors != nil {
-			http.Error(writer, errors.Error(),http.StatusInternalServerError)
-			return
-		}
-
-		var result []byte
-		var err error
-
-		for _,res := range data {
-			if id == res.Id {
-				result,err = json.Marshal(res)
-				if err != nil {
-					http.Error(writer, errors.Error(),http.StatusInternalServerError)
-					return
-				}
-				writer.Write(result)
-				return
-			}
-		}
-
-		http.Error(writer,"user not found guys",404)
-		return
-	}
-}
-
-const BaseUrl  = "http://localhost:8080"
-
-func httpLearning()  {
-	fmt.Println("start web server on port 8080")
-	http.HandleFunc("/employe",employe)
-	http.HandleFunc("/employes",employes)
-	http.HandleFunc("/fetch",fetchData)
-	http.ListenAndServe(":8080",nil)
-}
-
-func fetchData(writer http.ResponseWriter, r *http.Request)  {
-	var result,err = fetchEmployee()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	writer.Header().Set("Content-Type","application/json")
-	data,err := json.Marshal(result)
-	if err != nil {
-		http.Error(writer,err.Error(),http.StatusInternalServerError)
-	}
-	writer.Write(data)
-
-	for _,each := range result  {
-		fmt.Println(each.Id)
-	}
-}
-
-func fetchEmployee()([]employee, error)  {
-	var client = http.Client{}
-	var err error
-	var data []employee
-
-	request,err := http.NewRequest("POST",BaseUrl+"/employes",nil)
-	if err != nil {
-		return nil,err
-	}
-
-	response,err := client.Do(request)
-	if err != nil {
-		return nil,err
-	}
-
-	defer response.Body.Close()
-	err = json.NewDecoder(response.Body).Decode(&data)
-	if err != nil {
-		return nil,err
-	}
-	return data,nil
-}
-
-func httpFormLearning(w http.ResponseWriter,r *http.Request)  {
-	var err error
-	var client = &http.Client{}
-	var data employee
-
-	var params = url.Values{}
-
-	params.Set("id","2")
-	fmt.Println(params)
-	var payload = bytes.NewBufferString(params.Encode())
-	fmt.Println(payload)
-
-	req,err := http.NewRequest("POST",BaseUrl+"/employe",payload)
-
-	if err != nil {
-		http.Error(w,err.Error(),http.StatusInternalServerError)
-		return
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	response,err := client.Do(req)
-
-	if err != nil {
-		http.Error(w,err.Error(),http.StatusInternalServerError)
-		return
-	}
-	defer response.Body.Close()
-
-	err = json.NewDecoder(response.Body).Decode(&data)
-	if err != nil {
-		http.Error(w,err.Error(),http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Println(data)
-	return
-
-}
-
-func sqlLearning()  {
-	db, err := connectSql()
-	if err != nil{
-		fmt.Println(err.Error())
-		return
-	}
-	defer db.Close()
-
-	var query = "SELECT * FROM employee where id = ? OR name like ?"
-	rows ,err := db.Query(query,3,"%J%")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	defer rows.Close()
-
-	var result []employee
-
-	for rows.Next()  {
-		var each = employee{}
-		var err = rows.Scan(&each.Id,&each.Name,&each.Roles)
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-
-		result = append(result,each)
-	}
-
-	if err = rows.Err(); err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	fmt.Println(result)
-
-	//single query
-	var single = "SELECT id, name, roles FROM employee where id = ?"
-	var res  = employee{}
-	err = db.QueryRow(single,1).
-		Scan(&res.Id,&res.Name,&res.Roles)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	fmt.Println(res)
-
-}
-
-func connectSql()(*sql.DB,error)  {
-	db, err := sql.Open("mysql","root:@tcp(127.0.0.1:3306)/golang")
-	if err != nil{
-		return nil,err
-	}
-
-	return db,nil
-}
-
-func prepareSqlLerning()  {
-	db, err := connectSql()
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer db.Close()
-
-	stmt, err := db.Prepare("SELECT id,name,roles FROM employee where id = ?")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer stmt.Close() // *stmt ini harus di close juga
-
-	var res1 = employee{}
-	stmt.QueryRow(1).Scan(&res1.Id,&res1.Name,&res1.Roles)
-	fmt.Println(res1)
-	var res2 = employee{}
-	stmt.QueryRow(2).Scan(&res2.Id,&res2.Name,&res2.Roles)
-	fmt.Println(res2)
-	var res3 = employee{}
-	stmt.QueryRow(3).Scan(&res3.Id,&res3.Name,&res3.Roles)
-	fmt.Println(res3)
-}
-
-func dbexecLearning()  {
-	db,err := connectSql()
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer db.Close()
-	insertStmt ,err := db.Prepare("INSERT INTO employee (name,roles) values (?,?)")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer insertStmt.Close()
-	data,_ := insertStmt.Exec("last","tes")
-	lookData(db)
-	id,_ := data.LastInsertId()
-	fmt.Println(id)
-
-	updateStmt,err := db.Prepare("update employee set name = ?, roles = ? where id=?")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer updateStmt.Close()
-
-	updateStmt.Exec("final","developer test",id)
-	lookData(db)
-
-	deleteStmt, err := db.Prepare("delete from employee where id = ?")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer deleteStmt.Close() //dont forget to close it
-
-	deleteStmt.Exec(id)
-	lookData(db)
-
-}
-
-func lookData(db *sql.DB){
-	rows , err := db.Query("select * from employee")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer rows.Close()
-	var final []employee
-	for rows.Next()  {
-		var result = employee{}
-
-		rows.Scan(&result.Id,&result.Name,&result.Roles)
-
-		final = append(final,result)
-	}
-	fmt.Println(final)
-}
-
-type student struct {
-	Name string `bson:"name"`
-	Class string `bson:"class"`
-}
+//func pointerLearning()  {
+//	var strings string = "tes"
+//	var tes *string = &strings
+//
+//	fmt.Println(*tes)
+//	*tes = "done"
+//
+//	fmt.Println(*tes)
+//	fmt.Println(strings)
+//
+//}
+//
+//func structLearning()  {
+//	var des = desa{}
+//	des.Nama = "kampungku ini"
+//	des.Kecamatan = "kresek"
+//	fmt.Println(des.countLength())
+//	des.changeDesa("mukidi")
+//	fmt.Println(des.countLength())
+//
+//}
+//
+//type (
+//	desa struct {
+//		Nama string
+//		Kecamatan string
+//	}
+//
+//	kecamatan struct {
+//		data int
+//	}
+//)
+////tipe data interface berarti bisa mengembalikan tipe data apapun.
+//func (des desa) countLength() (interface{}) {
+//	var length = len(des.Nama)
+//	return length
+//}
+//
+//func (des *desa) changeDesa(nama string)  {
+//	des.Nama = nama
+//}
+////public and private determine in character case, if starting with uppercase like Data, its public. if data, its private
+//func accessLevelLearning()  {
+//	var datas = Data{}
+//	datas.name = "pilonopila"
+//	fmt.Println(datas.CountDataLength())
+//}
+//
+//func (bagi *kecamatan) pembagian() int {
+//	bagi.data = bagi.data /2
+//	return bagi.data
+//
+//}
+//
+//
+//func (bagi *kecamatan) pengurangan() int {
+//	return  bagi.data - 2
+//}
+//
+//type wilayah interface {
+//	pembagian() int
+//	pengurangan() int
+//}
+//
+//func interfaceLearning()  {
+//	var kec wilayah = &kecamatan{10}
+//	fmt.Println(kec.pembagian())
+//	fmt.Println(kec.pengurangan())
+//}
+//
+//func emptyInterfaceLearning()  {
+//	var inter interface{} = &kecamatan{2}
+//	var secret = inter.(*kecamatan).data //casting to pointer, because default type of struct is string. so it should cast into each of type
+//	var pon *int = &secret
+//	fmt.Println(secret)
+//	fmt.Println(*pon)
+//}
+//
+//func reflectLearning()  {
+//	var number int
+//	number = 2
+//
+//	var name string
+//	name = "fahmi"
+//
+//	var kec = kecamatan{2}
+//	var point *int = &number
+//
+//	var reflectValue = reflect.ValueOf(point)
+//
+//	fmt.Println(reflect.ValueOf(number))
+//	fmt.Println(reflect.ValueOf(name))
+//	fmt.Println(reflect.ValueOf(kec))
+//
+//	fmt.Println(reflectValue.Kind())
+//	fmt.Println(reflectValue.Type())
+//	fmt.Println(reflectValue.Interface())
+//	var tes = reflectValue.Elem() // Elem mengambil elemen asli jika tipe reflect nya adalah pointer
+//	fmt.Println(tes.Kind()) // struct, pointer, int, string dll
+//
+//	var des = &desa{Nama: "pasir",Kecamatan:"kresek"}
+//	des.getInfoProperty()
+//}
+//
+//func (d *desa) getInfoProperty()  {
+//	value := reflect.ValueOf(d)
+//
+//	if value.Kind() == reflect.Ptr {
+//		value = value.Elem()
+//	}
+//	//fmt.Println(value)
+//
+//	var vtype = value.Type()
+//	fmt.Println(value)
+//	fmt.Println(value.NumField())
+//	for i := 0; i < vtype.NumField() ; i++  {
+//		fmt.Println("Name: ",vtype.Field(i).Name)
+//		fmt.Println("Type: ",vtype.Field(i).Type)
+//		fmt.Println("Value: ",value.Field(i).Interface()) // untuk mengakses interface, modifier atau field dari struct harus public
+//	}
+//}
+//
+//func goRoutineLearning()  {
+//	go show("INI")
+//	show("BUDI")
+//	fmt.Scanln()
+//}
+//
+//func show(message string)  {
+//	for i := 0; i < 50; i++  {
+//		fmt.Println((i + 1),message)
+//	}
+//}
+//
+//func channelLearning() {
+//	var message= make(chan int, 2)
+//	//var sayHello = func(who string) {
+//	//	var result = fmt.Sprintf("hello %s", who)
+//	//	message <- result
+//	//}
+//	//
+//	//go sayHello("fahmi")
+//	//go sayHello("ulul")
+//	//go sayHello("azmi")
+//	//
+//	//var person1 = <-message
+//	//fmt.Println(person1)
+//	//
+//	//var person2 = <-message
+//	//fmt.Println(person2)
+//	//
+//	//var person3 = <-message
+//	//fmt.Println(person3)
+//
+//	//channel as param
+//	//var dummy = []string{"hello","world","hehe","this","is","sparta"}
+//	//
+//	//for _, data := range dummy {
+//	//	go func(each string) {
+//	//		message <- each
+//	//	}(data)
+//	//}
+//	//
+//	//for i := 0; i < len(dummy) ;i++  {
+//	//	printChan(message)
+//	//}
+//	//buffered channel
+//
+//	go func() {
+//		for {
+//			i := <-message
+//			fmt.Println("data received", i)
+//		}
+//	}()
+//
+//	for i := 0;i < 10 ;i++  {
+//		fmt.Println("send data", i)
+//		message <- i
+//	}
+//}
+//
+//func printChan(message chan string)  {
+//	fmt.Println(<-message)
+//}
+//
+//func loopChannelLearning()  {
+//	var data = make(chan int)
+//	go setData(data)
+//	printData(data)
+//}
+//
+//func setData(ch chan<- int)  {
+//	for i := 0; i <= 100 ;i++  {
+//		ch<- i
+//	}
+//	close(ch)
+//}
+//
+//func printData(ch<- chan int)  {
+//	for data := range ch {
+//		fmt.Println(data)
+//	}
+//}
+//
+////channel direction :
+//// var chan<- = channel yang hanya bisa menerima data
+//// var <-chan = channel yang hanya bisa mengirim data
+//
+//func channelTimeout()  {
+//	rand.Seed(time.Now().Unix())
+//	fmt.Println(time.Duration(rand.Int()%10+1))
+//	var data = make(chan int)
+//	go sendingData(data)
+//	retrieveData(data)
+//}
+//
+//func sendingData(ch chan<- int)  {
+//	for i:= 0;true ;i++  {
+//		ch<- i
+//		time.Sleep(time.Duration(rand.Int()%10+1) * time.Second)
+//	}
+//}
+//
+//func retrieveData(ch <-chan int)  {
+//// initialize loop label
+//loop:
+//	for {
+//		select {
+//			case data := <-ch:
+//				fmt.Println("receive data:", data)
+//			case <-time.After(time.Second * 5):
+//				fmt.Println("timeout guys!!")
+//				break loop
+//		}
+//	}
+//
+//}
+//// defer berfungsi untuk meng-akhirkan eksekusi di paling akhir block code sekalipun setelah di return
+//func deferLearning()  {
+//	somedata := []string{"pizza","kebab","macaroni"}
+//	for _,data := range somedata{
+//		reasonChoise(data)
+//	}
+//}
+//
+//func reasonChoise(data string)  {
+//	defer fmt.Println("<------------->")
+//	defer fmt.Println("thank you!")
+//
+//	if data == "pizza" {
+//		fmt.Println("great! you choose", data)
+//		return
+//	}else if data == "macaroni"{
+//		fmt.Println("the",data,"is so nice!")
+//		return
+//	}
+//
+//	fmt.Println("you choose",data)
+//}
+//
+////exit statement will stop entire programs. either you was written defer statement, but it will not shown because exit will stop entire program and show exit status code
+//func exitLearning()  {
+//	var panic bool
+//
+//	panic = false
+//	defer fmt.Println("sipp")
+//
+//	if panic {
+//		os.Exit(1)
+//	}else {
+//		fmt.Println("works")
+//	}
+//}
+//
+//func errorLearning()  {
+//	var input string
+//
+//	fmt.Scanln(&input)
+//
+//	//var result int
+//	//var err error
+//
+//	//result, err = strconv.Atoi(input)
+//	//
+//	//if err != nil {
+//	//	fmt.Println(err.Error())
+//	//}else {
+//	//	fmt.Println(result,"success")
+//	//}
+//
+//	if valid, err := validate(input); valid {
+//		fmt.Println("works", input)
+//	}else {
+//		fmt.Println(err.Error())
+//	}
+//
+//}
+//
+//func validate(input string)(bool,error)  {
+//	if strings.TrimSpace(input) == "" {
+//		return false,errors.New("cannot accept empty input")
+//	}
+//	return true, nil
+//}
+//
+//func panicLearning()  {
+//	defer catch()
+//	var input string
+//	fmt.Scanln(&input)
+//
+//	if valid, err := validate(input); valid {
+//		fmt.Println("works")
+//	}else {
+//		panic(err.Error())
+//		fmt.Println("end")
+//	}
+//}
+//
+//func catch()  {
+//	if r := recover(); r != nil {
+//		fmt.Println("error occured : ",r)
+//	}else {
+//		fmt.Println("works as well")
+//	}
+//}
+//
+//func timeLearning()  {
+//	var now = time.Now()
+//	fmt.Println(now)
+//	fmt.Println(now.Year())
+//	var date,err = time.Parse("2006-01-02","2018-09-12");
+//	fmt.Println(date)
+//	if err != nil {
+//		fmt.Println(err.Error())
+//	}
+//}
+//
+//func timeRoutineLearning()  {
+//	var input int
+//	var ch = make(chan bool)
+//	var timeout int = 5
+//	go timer(timeout,ch)
+//	go watcher(timeout,ch)
+//
+//	fmt.Println("2x2 = ?")
+//	fmt.Scanln(&input)
+//
+//	if input == 4 {
+//		fmt.Println("benar")
+//	}else {
+//		fmt.Println("salah")
+//	}
+//
+//}
+//
+//func timer(timeout int, ch chan <- bool)  {
+//	time.AfterFunc(time.Duration(timeout)*time.Second, func() {
+//		ch <- true
+//	})
+//}
+//
+//func watcher(timeout int, ch <- chan bool)  {
+//	<-ch
+//	fmt.Println("timeout!!!", timeout,"second")
+//	os.Exit(0)
+//}
+//
+//func encodeLearning()  {
+//	var data = "hello world"
+//	fmt.Println([]byte(data))
+//	var encoded = base64.StdEncoding.EncodeToString([]byte(data))
+//	fmt.Println(encoded)
+//	var decoded,_ = base64.StdEncoding.DecodeString(encoded)
+//	fmt.Println(string(decoded))
+//}
+//
+//func hashLearning()  {
+//	var data = "secret"
+//	var sha = sha1.New()
+//	sha.Write([]byte(data))
+//	var hashed = fmt.Sprintf("%x",sha.Sum(nil))
+//	fmt.Println(hashed)
+//}
+//
+//func saltingHashLearning()  {
+//	var data = "this is secret"
+//	var salt =  fmt.Sprintf("%d",time.Now().UnixNano())
+//	fmt.Println(reflect.ValueOf(salt).Kind())
+//	var sha = sha1.New()
+//	var salted = fmt.Sprintf("text: %s salt: %s",data,salt)
+//	fmt.Println(salted)
+//	sha.Write([]byte(salted))
+//	var hashed = fmt.Sprintf("%x",sha.Sum(nil))
+//	fmt.Println(hashed)
+//
+//}
+//
+//func flagArgLearning()  {
+//	var data = os.Args
+//	fmt.Printf("%#v \n", data)
+//	var filter = data[1:]
+//	fmt.Printf("%#v \n",filter)
+//
+//	var name = flag.String("name","Anonymous","user name")
+//	var age = flag.Int64("age",18,"your age")
+//	flag.Parse()
+//
+//	fmt.Printf("name: %s \n", *name)
+//	fmt.Printf("age : %d \n", *age)
+//
+//}
+//
+//func execLearning(){
+//	var outputs,_ = exec.Command("ls").Output()
+//	fmt.Println(string(outputs))
+//
+//	var output2,_ = exec.Command("git","config","user.name").Output()
+//	fmt.Println(string(output2))
+//}
+//
+//func httpListenerLearning()  {
+//	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+//		fmt.Fprintln(writer, "hello world")
+//	})
+//
+//	http.HandleFunc("/index",index)
+//
+//	fmt.Println("starting web on port 8080")
+//	http.ListenAndServe(":8080",nil)
+//
+//}
+//
+//func index(writer http.ResponseWriter, request *http.Request)  {
+//	fmt.Fprintln(writer, "index page")
+//}
+//
+//type datajson struct {
+//	FullName string `json:"Name"` //tag ini digunakan yang berarti "data json yang bernama Name itu masuk ke data struct FullName"
+//	Roles string
+//}
+//
+//
+//func jsonLearning()  {
+//	var data datajson
+//
+//	var jsonString = `{"Name": "Fahmi","Roles": "admin"}`
+//	var jsonData = []byte(jsonString)
+//
+//	var err = json.Unmarshal(jsonData,&data)
+//	if err != nil {
+//		fmt.Println("error")
+//		fmt.Println(err.Error())
+//		return
+//	}
+//
+//	fmt.Println(data.FullName)
+//	fmt.Println(data.Roles)
+//}
+//
+//type employee struct {
+//	Id int
+//	Name string
+//	Roles string
+//}
+//var data = []employee{
+//	employee{1,"Fahmi","admin"},
+//	employee{2,"Ulul","user"},
+//	employee{3,"Azmi","editor"},
+//}
+//
+//func jsonAPILearning()  {
+//
+//	http.HandleFunc("/",index)
+//	http.HandleFunc("/employes",employes )
+//	http.HandleFunc("/employe",employe )
+//	fmt.Println("starting go apps on port 8080")
+//	http.ListenAndServe(":8080",nil)
+//}
+//
+//func employes(writer http.ResponseWriter, request *http.Request) {
+//	writer.Header().Set("Content-Type","application/json")
+//	if request.Method == "POST" {
+//		var res,err = json.Marshal(data)
+//		if err != nil {
+//			http.Error(writer,err.Error(),http.StatusInternalServerError)
+//		}
+//
+//		writer.Write(res)
+//		return
+//
+//	}else if request.Method == "GET" {
+//
+//	}
+//}
+//
+//func employe(writer http.ResponseWriter, request *http.Request)  {
+//	writer.Header().Set("Content-Type","application/json")
+//
+//	if request.Method == "POST" {
+//		var id,errors = strconv.Atoi( request.FormValue("id"))
+//		if errors != nil {
+//			http.Error(writer, errors.Error(),http.StatusInternalServerError)
+//			return
+//		}
+//
+//		var result []byte
+//		var err error
+//
+//		for _,res := range data {
+//			if id == res.Id {
+//				result,err = json.Marshal(res)
+//				if err != nil {
+//					http.Error(writer, errors.Error(),http.StatusInternalServerError)
+//					return
+//				}
+//				writer.Write(result)
+//				return
+//			}
+//		}
+//
+//		http.Error(writer,"user not found guys",404)
+//		return
+//	}
+//}
+//
+//const BaseUrl  = "http://localhost:8080"
+//
+//func httpLearning()  {
+//	fmt.Println("start web server on port 8080")
+//	http.HandleFunc("/employe",employe)
+//	http.HandleFunc("/employes",employes)
+//	http.HandleFunc("/fetch",fetchData)
+//	http.ListenAndServe(":8080",nil)
+//}
+//
+//func fetchData(writer http.ResponseWriter, r *http.Request)  {
+//	var result,err = fetchEmployee()
+//	if err != nil {
+//		fmt.Println(err.Error())
+//	}
+//	writer.Header().Set("Content-Type","application/json")
+//	data,err := json.Marshal(result)
+//	if err != nil {
+//		http.Error(writer,err.Error(),http.StatusInternalServerError)
+//	}
+//	writer.Write(data)
+//
+//	for _,each := range result  {
+//		fmt.Println(each.Id)
+//	}
+//}
+//
+//func fetchEmployee()([]employee, error)  {
+//	var client = http.Client{}
+//	var err error
+//	var data []employee
+//
+//	request,err := http.NewRequest("POST",BaseUrl+"/employes",nil)
+//	if err != nil {
+//		return nil,err
+//	}
+//
+//	response,err := client.Do(request)
+//	if err != nil {
+//		return nil,err
+//	}
+//
+//	defer response.Body.Close()
+//	err = json.NewDecoder(response.Body).Decode(&data)
+//	if err != nil {
+//		return nil,err
+//	}
+//	return data,nil
+//}
+//
+//func httpFormLearning(w http.ResponseWriter,r *http.Request)  {
+//	var err error
+//	var client = &http.Client{}
+//	var data employee
+//
+//	var params = url.Values{}
+//
+//	params.Set("id","2")
+//	fmt.Println(params)
+//	var payload = bytes.NewBufferString(params.Encode())
+//	fmt.Println(payload)
+//
+//	req,err := http.NewRequest("POST",BaseUrl+"/employe",payload)
+//
+//	if err != nil {
+//		http.Error(w,err.Error(),http.StatusInternalServerError)
+//		return
+//	}
+//	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+//
+//	response,err := client.Do(req)
+//
+//	if err != nil {
+//		http.Error(w,err.Error(),http.StatusInternalServerError)
+//		return
+//	}
+//	defer response.Body.Close()
+//
+//	err = json.NewDecoder(response.Body).Decode(&data)
+//	if err != nil {
+//		http.Error(w,err.Error(),http.StatusInternalServerError)
+//		return
+//	}
+//
+//	fmt.Println(data)
+//	return
+//
+//}
+//
+//func sqlLearning()  {
+//	db, err := connectSql()
+//	if err != nil{
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer db.Close()
+//
+//	var query = "SELECT * FROM employee where id = ? OR name like ?"
+//	rows ,err := db.Query(query,3,"%J%")
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//
+//	defer rows.Close()
+//
+//	var result []employee
+//
+//	for rows.Next()  {
+//		var each = employee{}
+//		var err = rows.Scan(&each.Id,&each.Name,&each.Roles)
+//
+//		if err != nil {
+//			fmt.Println(err.Error())
+//			return
+//		}
+//
+//		result = append(result,each)
+//	}
+//
+//	if err = rows.Err(); err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//
+//	fmt.Println(result)
+//
+//	//single query
+//	var single = "SELECT id, name, roles FROM employee where id = ?"
+//	var res  = employee{}
+//	err = db.QueryRow(single,1).
+//		Scan(&res.Id,&res.Name,&res.Roles)
+//
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//
+//	fmt.Println(res)
+//
+//}
+//
+//func connectSql()(*sql.DB,error)  {
+//	db, err := sql.Open("mysql","root:@tcp(127.0.0.1:3306)/golang")
+//	if err != nil{
+//		return nil,err
+//	}
+//
+//	return db,nil
+//}
+//
+//func prepareSqlLerning()  {
+//	db, err := connectSql()
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer db.Close()
+//
+//	stmt, err := db.Prepare("SELECT id,name,roles FROM employee where id = ?")
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer stmt.Close() // *stmt ini harus di close juga
+//
+//	var res1 = employee{}
+//	stmt.QueryRow(1).Scan(&res1.Id,&res1.Name,&res1.Roles)
+//	fmt.Println(res1)
+//	var res2 = employee{}
+//	stmt.QueryRow(2).Scan(&res2.Id,&res2.Name,&res2.Roles)
+//	fmt.Println(res2)
+//	var res3 = employee{}
+//	stmt.QueryRow(3).Scan(&res3.Id,&res3.Name,&res3.Roles)
+//	fmt.Println(res3)
+//}
+//
+//func dbexecLearning()  {
+//	db,err := connectSql()
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer db.Close()
+//	insertStmt ,err := db.Prepare("INSERT INTO employee (name,roles) values (?,?)")
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer insertStmt.Close()
+//	data,_ := insertStmt.Exec("last","tes")
+//	lookData(db)
+//	id,_ := data.LastInsertId()
+//	fmt.Println(id)
+//
+//	updateStmt,err := db.Prepare("update employee set name = ?, roles = ? where id=?")
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer updateStmt.Close()
+//
+//	updateStmt.Exec("final","developer test",id)
+//	lookData(db)
+//
+//	deleteStmt, err := db.Prepare("delete from employee where id = ?")
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer deleteStmt.Close() //dont forget to close it
+//
+//	deleteStmt.Exec(id)
+//	lookData(db)
+//
+//}
+//
+//func lookData(db *sql.DB){
+//	rows , err := db.Query("select * from employee")
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer rows.Close()
+//	var final []employee
+//	for rows.Next()  {
+//		var result = employee{}
+//
+//		rows.Scan(&result.Id,&result.Name,&result.Roles)
+//
+//		final = append(final,result)
+//	}
+//	fmt.Println(final)
+//}
+//
+//type student struct {
+//	Name string `bson:"name"`
+//	Class string `bson:"class"`
+//}
 func connectNoSql()(*mgo.Session, error)  {
 	var session, err = mgo.Dial("localhost")
 	if err != nil {
@@ -1021,83 +1006,85 @@ func connectNoSql()(*mgo.Session, error)  {
 
 	return session,nil
 }
-
-func nosqlLearning()  {
-	defer catch()
-	var db, err = connectNoSql()
-	if err != nil {
-		panic(err.Error())
-		fmt.Println(err.Error())
-		return
-	}
-	defer db.Close()
-
-	//view data
-	var collection = db.DB("golang").C("student")
-	lookMongo(collection)
-
-	//insert data
-	err = collection.Insert(&student{"this","dua"})
-	if err != nil{
-		panic(err.Error())
-		fmt.Println(err.Error())
-		return
-	}
-	lookMongo(collection)
-
-	var updated = make(chan bool)
-
-	//update data
-	var selector = bson.M{"name":"this"}
-	go updateData(collection,selector,bson.M{"$set": bson.M{"name": "that"}},updated)
-
-	lookMongo(collection)
-	//delete data
-	<-updated
-	err = collection.Remove(bson.M{"name":"that"})
-	if err != nil {
-		panic(err.Error())
-		return
-	}
-	lookMongo(collection)
-
-}
-
-func lookMongo(collection *mgo.Collection)  {
-	var res []student
-	err := collection.Find(nil).All(&res)
-	if err != nil {
-		panic(err.Error())
-		fmt.Println(err.Error())
-		return
-	}
-	fmt.Println(res)
-}
-
-func updateData(collection *mgo.Collection,selector interface{},changes interface{},updated chan <- bool )(error)  {
-	err := collection.Update(selector,changes)
-	if err != nil {
-		panic(err.Error())
-		return err
-	}
-	updated <- true
-	return nil
-}
+//
+//func nosqlLearning()  {
+//	defer catch()
+//	var db, err = connectNoSql()
+//	if err != nil {
+//		panic(err.Error())
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	defer db.Close()
+//
+//	//view data
+//	var collection = db.DB("golang").C("student")
+//	lookMongo(collection)
+//
+//	//insert data
+//	err = collection.Insert(&student{"this","dua"})
+//	if err != nil{
+//		panic(err.Error())
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	lookMongo(collection)
+//
+//	var updated = make(chan bool)
+//
+//	//update data
+//	var selector = bson.M{"name":"this"}
+//	go updateData(collection,selector,bson.M{"$set": bson.M{"name": "that"}},updated)
+//
+//	lookMongo(collection)
+//	//delete data
+//	<-updated
+//	err = collection.Remove(bson.M{"name":"that"})
+//	if err != nil {
+//		panic(err.Error())
+//		return
+//	}
+//	lookMongo(collection)
+//
+//}
+//
+//func lookMongo(collection *mgo.Collection)  {
+//	var res []student
+//	err := collection.Find(nil).All(&res)
+//	if err != nil {
+//		panic(err.Error())
+//		fmt.Println(err.Error())
+//		return
+//	}
+//	fmt.Println(res)
+//}
+//
+//func updateData(collection *mgo.Collection,selector interface{},changes interface{},updated chan <- bool )(error)  {
+//	err := collection.Update(selector,changes)
+//	if err != nil {
+//		panic(err.Error())
+//		return err
+//	}
+//	updated <- true
+//	return nil
+//}
 
 type User struct {
+	ID bson.ObjectId `bson:"_id"`
 	Username string `bson:"username"`
 	Email string `bson:"email"`
 }
 
 type Method interface {
-	insert()
+	insert() error
+	getData() (User,error)
 }
 
-func (user *User) insert() {
+func (user *User) insert() error{
 	db,err := connectNoSql()
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		log.Fatal("cannot dial mongo",err)
+		return err
 	}
 	defer db.Close()
 
@@ -1105,14 +1092,48 @@ func (user *User) insert() {
 
 	err = collection.Insert(user)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		log.Fatal("cannot insert data", err)
+		return err
 	}
 
-	return
+	return nil
 }
 
+func(user *User) getData() (User,error)  {
+	var result = User{}
+
+	db,err := connectNoSql()
+	if err != nil {
+		log.Fatal(err)
+		return  result,err
+	}
+	defer db.Close()
+
+	var selector = bson.M{"_id": user.ID}
+
+	var collection = db.DB("golang").C("users")
+
+	err = collection.Find(selector).One(&result)
+	if err != nil {
+		log.Fatal(err)
+		return result,err
+	}
+	return result,nil
+
+}
 func insertData()  {
-	var user Method = &User{"fahmi","neticxploit@gmail.com"}
-	user.insert()
+	var id = bson.NewObjectId()
+	fmt.Println(id)
+	var user Method = &User{id,"tes","es@gmail.com"}
+	err := user.insert()
+	if err != nil {
+		log.Fatal(err)
+	}
+	 data,err := user.getData()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Println(data)
+
 }
