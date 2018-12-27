@@ -1201,6 +1201,8 @@ func webHttpLearning()  {
 		var message = "using closure statement"
 		writer.Write([]byte(message))
 	})
+	http.Handle("/static/",http.StripPrefix("/static/",http.FileServer(http.Dir("assets"))))
+
 	var err error
 
 	//1 using http.ListenAndServe
