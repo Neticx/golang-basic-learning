@@ -62,7 +62,8 @@ func main()  {
 	//nosqlLearning()
 	//insertData()
 	//waitGroupLearning()
-	mutexLearning()
+	//mutexLearning()
+	webHttpLearning()
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request)  {
@@ -1191,4 +1192,34 @@ func (counter *counter) add( x int)  {
 
 func (counter *counter) Value() (x int) {
 	return counter.val
+}
+
+func webHttpLearning()  {
+	http.HandleFunc("/",handlerIndex)
+	http.HandleFunc("/blog",handlerBlog)
+	http.HandleFunc("/close", func(writer http.ResponseWriter, request *http.Request) {
+		var message = "using closure statement"
+		writer.Write([]byte(message))
+	})
+	var err error
+
+	//1 using http.ListenAndServe
+	//err = http.ListenAndServe(":8080",nil)
+	//2 using http.Server
+	var server = new(http.Server)
+	server.Addr = ":8080"
+	err = server.ListenAndServe()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
+func handlerIndex(w http.ResponseWriter, r *http.Request)  {
+	var message = "hello guys"
+	w.Write([]byte(message))
+}
+
+func handlerBlog(w http.ResponseWriter, r *http.Request)  {
+	var message = "blog page"
+	w.Write([]byte(message))
 }
